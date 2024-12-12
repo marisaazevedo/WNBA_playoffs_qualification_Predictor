@@ -6,83 +6,98 @@ from sklearn.metrics import mean_squared_error
 
 # Define regular season score calculation
 def calculate_regular_season_score(row, weights):
+    MAX = 383.3
+    score = 0
     if 'G' in row['pos'] and 'F' in row['pos']:  # G-F or F-G
-        return (
+        score = (
             0.15 * row['points'] * weights['points'] +
             0.275 * row['assists'] * weights['assists'] +
             0.1 * row['steals'] * weights['steals'] +
             0.175 * row['threeMade'] * weights['threeMade'] +
             0.15 * row['rebounds'] * weights['rebounds'] +
             0.075 * row['blocks'] * weights['blocks'] -
-            0.1 * row['turnovers'] * weights['turnovers']
+            0.1 * row['turnovers'] * weights['turnovers'] +
+            row['awards'] * weights['awards']
         )
     elif 'F' in row['pos'] and 'C' in row['pos']:  # F-C or C-F
-        return (
+        score = (
             0.35 * row['rebounds'] * weights['rebounds'] +
             0.35 * row['points'] * weights['points'] +
             0.15 * row['blocks'] * weights['blocks'] +
             0.075 * row['assists'] * weights['assists'] -
-            0.05 * row['turnovers'] * weights['turnovers']
+            0.05 * row['turnovers'] * weights['turnovers'] +
+            row['awards'] * weights['awards']
         )
     elif 'G' in row['pos']:  # Pure Guard
-        return (
+        score = (
             0.3 * row['points'] * weights['points'] +
             0.25 * row['assists'] * weights['assists'] +
             0.2 * row['steals'] * weights['steals'] +
             0.15 * row['threeMade'] * weights['threeMade'] -
-            0.1 * row['turnovers'] * weights['turnovers']
+            0.1 * row['turnovers'] * weights['turnovers'] +
+            row['awards'] * weights['awards']
         )
     elif 'F' in row['pos']:  # Pure Forward
-        return (
+        score = (
             0.35 * row['points'] * weights['points'] +
             0.3 * row['rebounds'] * weights['rebounds'] +
             0.2 * row['assists'] * weights['assists'] +
             0.1 * row['blocks'] * weights['blocks'] -
-            0.05 * row['turnovers'] * weights['turnovers']
+            0.05 * row['turnovers'] * weights['turnovers'] +
+            row['awards'] * weights['awards']
         )
     elif 'C' in row['pos']:  # Pure Center
-        return (
+        score = (
             0.4 * row['rebounds'] * weights['rebounds'] +
             0.35 * row['points'] * weights['points'] +
             0.2 * row['blocks'] * weights['blocks'] -
-            0.05 * row['turnovers'] * weights['turnovers']
+            0.05 * row['turnovers'] * weights['turnovers'] +
+            row['awards'] * weights['awards']
         )
-    return 0
+
+    # Normalize between 0 and 1
+    score = score / MAX
+
+
+    return score
 
 
 # Define postseason score calculation
-def calculate_postseason_score(row):
-    if row['PostMinutes'] == 0:  # Avoid division by zero
-        return 0
-    PostPointsPerMinute = row['PostPoints'] / row['PostMinutes']
-    PostReboundsPerMinute = row['PostRebounds'] / row['PostMinutes']
-    PostAssistsPerMinute = row['PostAssists'] / row['PostMinutes']
-    PostStealsPerMinute = row['PostSteals'] / row['PostMinutes']
-    PostBlocksPerMinute = row['PostBlocks'] / row['PostMinutes']
-    PostTurnoversPerMinute = row['PostTurnovers'] / row['PostMinutes']
-    PostThreeMadePerMinute = row['PostthreeMade'] / row['PostMinutes']
+def calculate_postseason_score(row, weights):
+    max = 101.9
     
     if 'G' in row['pos'] and 'F' in row['pos']:  # G-F or F-G
-        return (0.15 * PostPointsPerMinute + 0.275 * PostAssistsPerMinute + 
-                0.1 * PostStealsPerMinute + 0.175 * PostThreeMadePerMinute + 
-                0.15 * PostReboundsPerMinute + 0.075 * PostBlocksPerMinute - 
-                0.1 * PostTurnoversPerMinute)
+        score = ((0.15 * row['PostPoints'] * weights['points'] +
+                + 0.275 * row['PostAssists'] * weights['assists'] + 
+                0.1 * row['PostSteals'] * weights['steals'] +
+                0.175 * row['PostthreeMade'] * weights['threeMade'] +
+                0.15 * row['PostRebounds'] * weights['rebounds'] +
+                0.075 * row['PostBlocks'] * weights['blocks'] -
+                0.1 * row['PostTurnovers'] * weights['turnovers']))
     elif 'F' in row['pos'] and 'C' in row['pos']:  # F-C or C-F
-        return (0.35 * PostReboundsPerMinute + 0.35 * PostPointsPerMinute + 
-                0.15 * PostBlocksPerMinute + 0.075 * PostAssistsPerMinute - 
-                0.05 * PostTurnoversPerMinute)
+        score = ((0.35 * row['PostRebounds'] * weights['rebounds'] +
+                0.35 * row['PostPoints'] * weights['points'] +
+                0.15 * row['PostBlocks'] * weights['blocks'] +
+                0.075 * row['PostAssists'] * weights['assists'] -
+                0.05 * row['PostTurnovers'] * weights['turnovers']))
     elif 'G' in row['pos']:  # Pure Guard
-        return (0.3 * PostPointsPerMinute + 0.25 * PostAssistsPerMinute + 
-                0.2 * PostStealsPerMinute + 0.15 * PostThreeMadePerMinute - 
-                0.1 * PostTurnoversPerMinute)
+        score = ((0.3 * row['PostPoints'] * weights['points'] +
+                0.25 * row['PostAssists'] * weights['assists'] + 
+                0.2 * row['PostSteals'] * weights['steals'] +
+                0.15 * row['PostthreeMade'] * weights['threeMade'] -
+                0.1 * row['PostTurnovers'] * weights['turnovers']))
     elif 'F' in row['pos']:  # Pure Forward
-        return (0.35 * PostPointsPerMinute + 0.3 * PostReboundsPerMinute + 
-                0.2 * PostAssistsPerMinute + 0.1 * PostBlocksPerMinute - 
-                0.05 * PostTurnoversPerMinute)
+        score = ((0.35 * row['PostPoints'] * weights['points'] +
+                0.3 * row['PostRebounds'] * weights['rebounds'] +
+                0.2 * row['PostAssists'] * weights['assists'] +
+                0.1 * row['PostBlocks'] * weights['blocks'] -
+                0.05 * row['PostTurnovers'] * weights['turnovers']))
     elif 'C' in row['pos']:  # Pure Center
-        return (0.4 * PostReboundsPerMinute + 0.35 * PostPointsPerMinute + 
-                0.2 * PostBlocksPerMinute - 0.05 * PostTurnoversPerMinute)
-    return 0
+        score = ((0.4 * row['PostRebounds'] * weights['rebounds'] +
+                0.35 * row['PostPoints'] * weights['points'] +
+                0.2 * row['PostBlocks'] * weights['blocks'] -
+                0.05 * row['PostTurnovers'] * weights['turnovers']))
+    return score/max
 
 
 def calculate_team_score(row, df):
@@ -103,7 +118,7 @@ def calculate_team_score(row, df):
     return weighted_mean
 
 
-def predict_heuristic_next(df):
+def predict_heuristic_next(df, df_data11):
     # === Feature Engineering ===
 
     # Rolling averages for past performance
@@ -188,18 +203,16 @@ def calculate_teamScore_post(row, df):
 
 def merge_players_with_awards(players_df, awards_df):
     # Create a column 'awards' in awards_df to indicate if a player has gained an award
-    awards_df['awards'] = 1
+    players_df['awards'] = 0
 
-    # Group the awards data by playerID and year, and aggregate the awards count
-    awards_agg = awards_df.groupby(['playerID', 'year'])['awards'].sum().reset_index()
+    # compare the playerID in players_df and awards_df and merge it the count of awards in the same year to the players_df
+    for index, row in awards_df.iterrows():
+        playerID = row['playerID']
+        year = row['year']
+        players_df.loc[(players_df['playerID'] == playerID) & (players_df['year'] == year), 'awards'] += 1
+    
+    return players_df
 
-    # Merge the aggregated awards data with the players DataFrame
-    merged_df = players_df.merge(awards_agg, on=['playerID', 'year'], how='left')
-
-    # Fill NaN values in the awards column with 0
-    merged_df['awards'] = merged_df['awards'].fillna(0).astype(int)
-
-    return merged_df
 
 
 def merge_awards(players_df, coaches_df, awards_df):
@@ -247,7 +260,7 @@ def merge_coaches(df_teams, df_coaches):
             'coaches_post': (group['post_win_rate'] * group['weight']).sum() / group['weight'].sum(),
             'coaches_history': (group['mean_win_rate'] * group['weight']).sum() / group['weight'].sum(),
             'coaches_history_pos': (group['mean_post_win_rate'] * group['weight']).sum() / group['weight'].sum(),
-            'awards_coach': (group['awards'] * group['weight']).sum(),
+            #'awards_coach': (group['awards'] * group['weight']).sum(),
         }))
         .reset_index()
     )
@@ -268,9 +281,9 @@ def merge_players(df_teams, df_players):
         df_players_teamPredictScoreOP
         .groupby(['year', 'tmID'])
         .apply(lambda group: pd.Series({
-            'team_predict_mean': (group['predict_team_score'] * group['weight']).sum() / group['weight'].sum(),
-            'team_post_mean': (group['teamScore_post'] * group['weight']).sum() / group['weight'].sum(),
-            'teamScore_mean': (group['TeamScore'] * group['weight']).sum() / group['weight'].sum(),
+            'team_squad_expectation': (group['predict_team_score'] * group['weight']).sum() / group['weight'].sum(),
+            'current_squad_post_performance': (group['teamScore_post'] * group['weight']).sum() / group['weight'].sum(),
+            'current_squad_performance': (group['TeamScore'] * group['weight']).sum() / group['weight'].sum(),
             'awards_players': (group['awards'] * group['weight']).sum(),
         }))
         .reset_index()
@@ -294,11 +307,66 @@ def calculate_last_3_years_history(df):
             num_years = min(i + 1, 3)  # Max years is 3
             last_years = group.iloc[max(0, i - num_years + 1):i + 1]
             avg_score = last_years.apply(
-                lambda row: (row['team_predict_mean']), axis=1
+                lambda row: (row['team_squad_expectation']), axis=1
             ).mean()
             scores.append(avg_score)
         
         # Assign scores back to the DataFrame
         df.loc[group.index, 'last_3_years_history'] = scores
+
+    return df
+
+
+def calculate_history_excluding_last_3_years(df):
+    df['history_excluding_last_3_years'] = None  # Initialize the column
+    for tmID, group in df.groupby('tmID'):
+        group = group.sort_values('year')  # Sort by year
+        scores = []
+        
+        for i in range(len(group)):
+            # Calculate the average score for all years except the last 3
+            if i < 3:
+                scores.append(0)  # Not enough data to exclude the last 3 years
+            else:
+                history_years = group.iloc[:i - 2]  # Exclude the last 3 years
+                avg_score = history_years.apply(
+                    lambda row: row['team_squad_expectation'], axis=1
+                ).mean()
+                scores.append(avg_score)
+        
+        # Assign scores back to the DataFrame
+        df.loc[group.index, 'history_until_3_years_left'] = scores
+
+    return df
+
+
+def calculate_team_lore(df):
+    # Initialize the team_lore column
+    df['team_lore'] = None
+
+    # Group by tmID
+    for tmID, group in df.groupby('tmID'):
+        group = group.sort_values('year')  # Sort by year
+        previous_team_lore = 0  # Initialize the previous year's team_lore
+
+        for i, row in group.iterrows():
+            # Calculate team_lore for the current year
+            current_team_lore = (
+                row['attend'] * 0.05 +
+                row['last_3_years_history'] * 0.9 +
+                row['history_until_3_years_left'] * 0.2 +
+                row['awards_players'] * 0.1 
+                # +
+                # row['awards_coach'] * 0.1
+            )
+
+            # Add the previous year's team_lore * 0.2
+            team_lore = current_team_lore + previous_team_lore * 0.2
+
+            # Assign the calculated team_lore back to the DataFrame
+            df.at[i, 'team_lore'] = team_lore
+
+            # Update the previous_team_lore for the next iteration
+            previous_team_lore = team_lore
 
     return df

@@ -16,3 +16,10 @@ def load_data():
     teams_post = pd.read_csv(os.path.join(folder_path, 'teams_post.csv'))
 
     return {'teams': teams, 'players': players, 'players_teams': players_teams, 'coaches': coaches, 'awards': awards, 'series_post': series_post, 'teams_post': teams_post}
+
+def load_data11():
+    coaches = pd.read_csv(os.path.join(folder_path, 'coaches11.csv'))
+    players_teams = pd.read_csv(os.path.join(folder_path, 'players_teams11.csv'))
+    teams = pd.read_csv(os.path.join(folder_path, 'teams11.csv'))
+
+    return {'coaches': coaches, 'players_teams': players_teams, 'teams': teams}

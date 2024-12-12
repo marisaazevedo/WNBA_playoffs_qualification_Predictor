@@ -64,8 +64,6 @@ def clean_teams(df):
         0.30 * (1 - df['d_pts'] / df['d_pts'].max())  # Normalizing points allowed
     )
 
-    # Overall normalized heuristic score (between 0 and 1)
-    df['Heuristic_Score'] = (df['Offensive_Score'] + df['Defensive_Score']) / 2
 
     columns_to_drop = [
         'FGE', 'FTE', '3PE', 'OREB%', 'AST/TO',  # Offensive metrics
