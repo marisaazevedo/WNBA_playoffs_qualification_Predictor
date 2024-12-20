@@ -2,6 +2,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 
 # visualizations.py
 
@@ -103,4 +104,18 @@ def plot_player_regular_score(player_id, df_players_teamScore):
     plt.ylabel('Regular Season Score')
     plt.title(f'Regular Season Score for Player {player_id}')
     plt.grid(True)
+    plt.show()
+
+
+
+def plot_correlation_matrix(df):
+    # make a funtion to do a corrulation matrix for a pd dataframe
+    import matplotlib.pyplot as plt
+
+    # Select only numeric columns
+    numeric_df = df.select_dtypes(include=['number'])
+    corr = numeric_df.corr()
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', vmin=-1, vmax=1)
+    plt.title('Correlation Matrix')
     plt.show()
